@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>成员</title>
+    
+
+    <script>
+      document.write(
+        `\<script src="./dist/dev/index.js?t=${new Date().getTime()}"\><\/script\>`
+      );
+    </script>
+    
+  </head>
+  <body>
+    <input id="token"/>
+    <button id="button">设置描述文件</button>
+    <hr/>
+    <input id="message"/>
+    <button id="send">发送消息</button>
+
+    <script type="text/javascript">
+      const iRtc = new EasyWebRTC.Channel({
+        server: 'stun:stun.l.google.com:19302'
+      })
+
+      iRtc.on('message', function (data) {
+        console.log("%c收到房间消息：", 'color:blue;',data)
+      })
+
+      
+
+      document.getElementById('button').onclick = function () {
+        const value = document.getElementById('token').value
+        console.log("value", value)
+        iRtc.updateDescription(value)
+      }
+
+      document.getElementById('send').onclick = function () {
+        iRtc.sendMessage(document.getElementById('message').value)
+      }
+      
+    </script>
+  </body>
+</html>

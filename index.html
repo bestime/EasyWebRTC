@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>房间</title>
+    <script src="./static/js/playTestVideo.js"></script>
+    <script>
+      document.write(
+        `\<script src="./dist/dev/index.js?t=${new Date().getTime()}"\><\/script\>`
+      );
+    </script>
+  </head>
+  <body>
+    描述：<textarea id="code" rows="5"></textarea>
+    <hr/>
+    ice：<textarea id="ice" rows="5"></textarea>
+    <button id="setting">设置对话</button>
+    <hr/>
+    <hr/>
+    <input id="message"/>
+    <button id="send">发送消息</button>
+    <script type="text/javascript">
+      const oCodeInput = document.getElementById('code')
+      const oIceInput = document.getElementById('ice')
+      const iRtc = new EasyWebRTC.Remote({
+        server: 'stun:stun.l.google.com:19302'
+      })
+
+      iRtc.on('message', function (data) {
+        console.log("%c收到频道消息：", 'color:blue;',data)
+      })
+
+      iRtc.on('ready', function () {
+        iRtc.sendMessage('你好！小伙伴们！222')
+      })
+
+
+      document.getElementById('send').onclick = function () {
+        iRtc.sendMessage(document.getElementById('message').value)
+      }
+      
+
+      document.getElementById('setting').onclick = function () {
+        iRtc.updateSecret(oCodeInput.value, oIceInput.value)
+      }
+      
+    </script>
+  </body>
+</html>
