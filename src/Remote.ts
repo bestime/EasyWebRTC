@@ -1,14 +1,39 @@
 import EasyWebRTC, { eReadyBus } from './EasyWebRTC'
 
-export default class Remote extends EasyWebRTC {
+export default class Remote {
   
+  _cfg: EasyWebRTC.BaseConfig;
+  _connection: RTCPeerConnection;
+  _channel: RTCDataChannel;
 
   constructor (config: EasyWebRTC.BaseConfig) {
-    super(config)
+    this._cfg = config;
+    this._connection = new RTCPeerConnection({
+      iceServers: [{ urls: this._cfg.server }]
+    });
+
+    this._channel = this._connection.createDataChannel('testChannel', {
+      negotiated: true,
+      id: 0
+    });
+
+    this._channel.onmessage = (ev) => {
+      this.onmessage(ev.data)
+    }
+
+    this._channel.onopen = (e) => {
+      this.onconnect()      
+    };
     
   }
 
-  updateSecret (description: string, ice: string) {
+  onmessage (data: any) {}
+  onconnect () {}
+  send (data: any) {
+    this._channel.send(data)
+  }
+
+  setSecret (description: string, ice: string) {
     
 
     const desc: RTCSessionDescriptionInit = JSON.parse(description)

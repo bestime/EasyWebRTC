@@ -35,6 +35,17 @@ export default class EasyWebRTC {
     this._channel.send(data as any)
   }
 
+  off (name: string, handler:any) {
+    switch(name) {
+      case 'ready':
+        eReadyBus.off(handler)
+        break;
+      case 'message':
+        eMessageBus.off(handler)
+        break;
+    }
+  }
+
   on(name: 'ready' | 'message', handler: any) {
     switch(name) {
       case 'ready':

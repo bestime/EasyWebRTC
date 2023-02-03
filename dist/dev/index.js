@@ -38,6 +38,16 @@ class EasyWebRTC {
     sendMessage(data) {
         this._channel.send(data);
     }
+    off(name, handler) {
+        switch (name) {
+            case 'ready':
+                eReadyBus.off(handler);
+                break;
+            case 'message':
+                eMessageBus.off(handler);
+                break;
+        }
+    }
     on(name, handler) {
         switch (name) {
             case 'ready':
@@ -75,11 +85,32 @@ class Channel extends EasyWebRTC {
     }
 }
 
-class Remote extends EasyWebRTC {
+class Remote {
+    _cfg;
+    _connection;
+    _channel;
     constructor(config) {
-        super(config);
+        this._cfg = config;
+        this._connection = new RTCPeerConnection({
+            iceServers: [{ urls: this._cfg.server }]
+        });
+        this._channel = this._connection.createDataChannel('testChannel', {
+            negotiated: true,
+            id: 0
+        });
+        this._channel.onmessage = (ev) => {
+            this.onmessage(ev.data);
+        };
+        this._channel.onopen = (e) => {
+            this.onconnect();
+        };
     }
-    updateSecret(description, ice) {
+    onmessage(data) { }
+    onconnect() { }
+    send(data) {
+        this._channel.send(data);
+    }
+    setSecret(description, ice) {
         const desc = JSON.parse(description);
         const ICE = JSON.parse(ice);
         this._connection.setRemoteDescription(desc);
@@ -91,8 +122,35 @@ class Remote extends EasyWebRTC {
     }
 }
 
+class Room {
+    _cfg;
+    _rooms = [];
+    constructor(config) {
+        this._cfg = config;
+    }
+    onmessage(data) { }
+    join(description, ice) {
+        const iRoom = new Remote(this._cfg);
+        iRoom.setSecret(description, ice);
+        this._rooms.push(iRoom);
+        iRoom.onmessage = (data) => {
+            this.onmessage(data);
+        };
+        iRoom.onconnect = () => {
+            iRoom.send('我加入了');
+        };
+    }
+    sendMessage(msg) {
+        console.log("发送消息", this._rooms);
+        this._rooms.forEach(function (iRoom) {
+            iRoom.send(msg);
+        });
+    }
+}
+
 exports.Channel = Channel;
 exports.Remote = Remote;
+exports.Room = Room;
 
 return exports;
 
